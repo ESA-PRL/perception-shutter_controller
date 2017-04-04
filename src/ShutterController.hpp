@@ -33,11 +33,13 @@ private:
      * Contains the configuration of the shutter controller.
      * Properties are initial shutter time, thresholds (TODO), ...
      */
-    Config mConfig;
+    Config config;
     int shutterTime;
     float scalingFactor;
-    int maxShutterTime;
-    int minShutterTime;
+    uint8_t threshMaxIntensity;
+    uint8_t threshMinIntensity;
+    uint8_t minMean;
+    uint8_t maxMean;
 };
 
 }
