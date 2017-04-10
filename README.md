@@ -4,7 +4,7 @@ This package can be used to control the shutter time.
 
 This package can analyze a picture frame and suggests an appropriate adaptation of the shutter time in order to increase the image quality of future frames.
 
-**Authors: Levin Gerdes
+**Authors: Levin Gerdes  
 Contact: Martin Azkarate  
 Affiliation: Automation and Robotics Laboratories, ESTEC, ESA**
 
