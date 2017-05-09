@@ -1,5 +1,5 @@
 #include "ShutterController.hpp"
-#include <iostream> // for cout
+#include <iostream>
 
 namespace shutter_controller
 {
@@ -16,14 +16,10 @@ ShutterController::ShutterController(const Config& nConfig)
 //int ShutterController::analyze(base::samples::frame::Frame frame)
 int ShutterController::analyze(std::vector<uint8_t> image)
 {
-    //std::vector<uint8_t> image = frame.getImage();
     int pixelCount = image.size()/sizeof(uint8_t);
 
     // use this to scale result to be be within allowed shutter time boundaries
     scalingFactor = (config.maxShutterTime - config.minShutterTime)/(float)pixelCount;
-
-    int maxNumTooBright = (int)(pixelCount * config.factNumTooBright);
-    int maxNumTooDark   = (int)(pixelCount * config.factNumTooDark);
 
     int numTooBright = 0;
     int numTooDark   = 0;
@@ -39,34 +35,23 @@ int ShutterController::analyze(std::vector<uint8_t> image)
     }
     double mean = (double)intensitySum / (double)pixelCount;
 
-    // debug only
-    //if (mean > maxMean)
-    //    std::cout << mean << " BIGGER THAN MAX MEAN " << (int)maxMean << std::endl;
-    //if (mean < minMean)
-    //    std::cout << mean << " SMALLER THAN MIN MEAN " << (int)minMean << std::endl;
-    //if (numTooBright > maxNumTooBright)
-    //    std::cout << numTooBright << " TOO MANY TOO BRIGHT " << maxNumTooBright << std::endl;
-    //if (numTooDark > maxNumTooDark)
-    //    std::cout << numTooDark << " TOO MANY TOO DARK " << maxNumTooDark << std::endl;
-
     // decide whether image is too bright or dark
-    if (mean > maxMean && numTooBright > maxNumTooBright)
+    if (mean > maxMean)
     {
         // image is too bright, return positive value
-        //std::cout << "Too bright: " << shutterTime << std::endl;
+        // std::cout << mean << " BIGGER THAN MAX MEAN " << (int)maxMean << std::endl;
         return numTooBright;
     }
-    else if (mean < minMean && numTooDark > maxNumTooDark)
+    else if (mean < minMean)
     {
         // image is too dark, return negative value
-        //std::cout << "Too dark: " << shutterTime << std::endl;
+        // std::cout << mean << " SMALLER THAN MIN MEAN " << (int)minMean << std::endl;
         return -numTooDark;
     }
     // image is within bounds
     return 0;
 }
 
-// TODO put some more thought/experiments into this
 int ShutterController::calcNewShutterTime(const int analysisResult)
 {
     shutterTime = 0.9*shutterTime + 0.1*(shutterTime - (scalingFactor * analysisResult));
