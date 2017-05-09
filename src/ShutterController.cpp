@@ -9,8 +9,8 @@ ShutterController::ShutterController(const Config& nConfig)
 {
     threshMaxIntensity = (uint8_t)(config.maxIntensity * config.factMaxIntensity);
     threshMinIntensity = (uint8_t)(config.maxIntensity * config.factMinIntensity);
-    minMean = config.maxIntensity * config.factMinIntensity;
-    maxMean = config.maxIntensity * config.factMaxIntensity;
+    minMean = (uint8_t)(config.maxIntensity * config.factMinMean);
+    maxMean = (uint8_t)(config.maxIntensity * config.factMaxMean);
 }
 
 //int ShutterController::analyze(base::samples::frame::Frame frame)
@@ -39,6 +39,16 @@ int ShutterController::analyze(std::vector<uint8_t> image)
     }
     double mean = (double)intensitySum / (double)pixelCount;
 
+    // debug only
+    //if (mean > maxMean)
+    //    std::cout << mean << " BIGGER THAN MAX MEAN " << (int)maxMean << std::endl;
+    //if (mean < minMean)
+    //    std::cout << mean << " SMALLER THAN MIN MEAN " << (int)minMean << std::endl;
+    //if (numTooBright > maxNumTooBright)
+    //    std::cout << numTooBright << " TOO MANY TOO BRIGHT " << maxNumTooBright << std::endl;
+    //if (numTooDark > maxNumTooDark)
+    //    std::cout << numTooDark << " TOO MANY TOO DARK " << maxNumTooDark << std::endl;
+
     // decide whether image is too bright or dark
     if (mean > maxMean && numTooBright > maxNumTooBright)
     {
@@ -59,7 +69,7 @@ int ShutterController::analyze(std::vector<uint8_t> image)
 // TODO put some more thought/experiments into this
 int ShutterController::calcNewShutterTime(const int analysisResult)
 {
-    shutterTime = shutterTime - (int)(scalingFactor * analysisResult/config.precision);
+    shutterTime = 0.9*shutterTime + 0.1*(shutterTime - (scalingFactor * analysisResult));
     shutterTime = std::max(config.minShutterTime, shutterTime);
     shutterTime = std::min(shutterTime, config.maxShutterTime);
     return shutterTime;
