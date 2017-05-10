@@ -54,7 +54,7 @@ int ShutterController::analyze(std::vector<uint8_t> image)
 
 int ShutterController::calcNewShutterTime(const int analysisResult)
 {
-    shutterTime = 0.9*shutterTime + 0.1*(shutterTime - (scalingFactor * analysisResult));
+    shutterTime = 0.995*shutterTime + 0.005*(shutterTime - (scalingFactor * analysisResult));
     shutterTime = std::max(config.minShutterTime, shutterTime);
     shutterTime = std::min(shutterTime, config.maxShutterTime);
     return shutterTime;
