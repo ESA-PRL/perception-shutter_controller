@@ -17,18 +17,16 @@ namespace shutter_controller
         double factMaxIntensity; // pixels brighter than <maxIntensity>*<factMaxIntensity> are considered too bright
         double factMinIntensity; // pixels darker   than <maxIntensity>*<factMinIntensity> are considered too dark
 
-        double factNumTooBright; // allow only <pixelCount>*<factNumTooBright> many pixels which are too bright
-        double factNumTooDark;
-
         // tolerance for mean intensity
         double factMinMean; // <maxIntensity>*<factMinMean>
         double factMaxMean; // <maxIntensity>*<factMaxMean>
 
-        // the higher the precision value, the lower the change rate
-        double precision;
-
         // compute and apply new shutter time every <shutterCompPeriod>th frame
         int shutterCompPeriod;
+
+        // new shutter time is computed as (x=weightOldShutterTime):
+        // newShutterTime = x*oldShutterTime + (1-x)*newGuess
+        double weightOldShutterTime;
 
         Config()
             :
@@ -38,12 +36,10 @@ namespace shutter_controller
             maxIntensity(255),
             factMaxIntensity(0.65),
             factMinIntensity(0.05),
-            factNumTooBright(0.10),
-            factNumTooDark(0.20),
             factMinMean(0.30),
             factMaxMean(0.40),
-            precision(32.0),
-            shutterCompPeriod(3)
+            shutterCompPeriod(3),
+            weightOldShutterTime(0.995)
         {
         }
     };

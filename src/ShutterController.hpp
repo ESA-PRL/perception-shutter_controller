@@ -36,6 +36,8 @@ private:
     Config config;
     int shutterTime;
     float scalingFactor;
+    double weightOld;
+    double weightNew;
     uint8_t threshMaxIntensity;
     uint8_t threshMinIntensity;
     uint8_t minMean;

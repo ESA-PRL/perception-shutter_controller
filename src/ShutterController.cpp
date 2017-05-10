@@ -11,6 +11,8 @@ ShutterController::ShutterController(const Config& nConfig)
     threshMinIntensity = (uint8_t)(config.maxIntensity * config.factMinIntensity);
     minMean = (uint8_t)(config.maxIntensity * config.factMinMean);
     maxMean = (uint8_t)(config.maxIntensity * config.factMaxMean);
+    weightOld = config.weightOldShutterTime;
+    weightNew = 1.0 - weightOld;
 }
 
 //int ShutterController::analyze(base::samples::frame::Frame frame)
@@ -54,7 +56,7 @@ int ShutterController::analyze(std::vector<uint8_t> image)
 
 int ShutterController::calcNewShutterTime(const int analysisResult)
 {
-    shutterTime = 0.995*shutterTime + 0.005*(shutterTime - (scalingFactor * analysisResult));
+    shutterTime = weightOld*shutterTime + weightNew*(shutterTime - (scalingFactor * analysisResult));
     shutterTime = std::max(config.minShutterTime, shutterTime);
     shutterTime = std::min(shutterTime, config.maxShutterTime);
     return shutterTime;
