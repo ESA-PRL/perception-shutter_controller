@@ -40,8 +40,8 @@ private:
     double weightNew;
     uint8_t threshMaxIntensity;
     uint8_t threshMinIntensity;
-    uint8_t minMean;
-    uint8_t maxMean;
+    double minMean;
+    double maxMean;
 };
 
 }

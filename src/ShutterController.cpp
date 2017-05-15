@@ -9,8 +9,8 @@ ShutterController::ShutterController(const Config& nConfig)
 {
     threshMaxIntensity = (uint8_t)(config.maxIntensity * config.factMaxIntensity);
     threshMinIntensity = (uint8_t)(config.maxIntensity * config.factMinIntensity);
-    minMean = (uint8_t)(config.maxIntensity * config.factMinMean);
-    maxMean = (uint8_t)(config.maxIntensity * config.factMaxMean);
+    minMean = config.maxIntensity * config.factMinMean;
+    maxMean = config.maxIntensity * config.factMaxMean;
     weightOld = config.weightOldShutterTime;
     weightNew = 1.0 - weightOld;
 }
