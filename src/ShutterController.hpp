@@ -17,7 +17,7 @@ public:
     ShutterController(const Config& config = Config());
 
     /** Computes the mean intensity and checks simple thresholds.
-     * If the mean is too bright and there are more bright pixels than allowed, 
+     * If the mean is too bright and there are more bright pixels than allowed,
      * it returns (num too bright pixels) - (threshold for num of too bright pixels).
      * Similarly, it returns a negative value (threshold for num of too dark pixels) - (num too dark pixels)
      * if the image mean is too dark with too many dark pixels.
