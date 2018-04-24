@@ -4,6 +4,9 @@
 #include <shutter_controller/Config.hpp>
 #include <vector>
 #include <stdint.h> // for uint8_t
+#include "base-logging/Logging.hpp"
+
+#define BASE_LOG_DISABLE
 
 namespace shutter_controller
 {

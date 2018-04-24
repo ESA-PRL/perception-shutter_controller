@@ -41,13 +41,13 @@ int ShutterController::analyze(std::vector<uint8_t> image)
     if (mean > maxMean)
     {
         // image is too bright, return positive value
-        // std::cout << mean << " BIGGER THAN MAX MEAN " << (int)maxMean << std::endl;
+        LOG_DEBUG_S << "Mean " << mean << " bigger than max mean " << (int)maxMean;
         return numTooBright;
     }
     else if (mean < minMean)
     {
         // image is too dark, return negative value
-        // std::cout << mean << " SMALLER THAN MIN MEAN " << (int)minMean << std::endl;
+        LOG_DEBUG_S << "Mean " << mean << " smaller than min mean " << (int)minMean;
         return -numTooDark;
     }
     // image is within bounds
