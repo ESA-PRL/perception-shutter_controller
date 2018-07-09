@@ -1,65 +1,61 @@
 #include "ShutterController.hpp"
-#include <iostream>
 
-namespace shutter_controller
+using namespace shutter_controller;
+
+ShutterController::ShutterController(const Config& new_config)
+    : config(new_config), shutter_time(config.init_shutter_time)
 {
+    threshold_min_intensity = static_cast<uint8_t>(config.max_intensity * config.fact_min_intensity);
+    threshold_max_intensity = static_cast<uint8_t>(config.max_intensity * config.fact_max_intensity);
+    min_mean = config.max_intensity * config.fact_min_mean;
+    max_mean = config.max_intensity * config.fact_max_mean;
+    weight_old = config.weight_old_shutter_time;
+    weight_new = 1.0 - weight_old;
+}
 
-    ShutterController::ShutterController(const Config& nConfig)
-        : config(nConfig), shutterTime(config.initShutterTime)
+int ShutterController::analyze(const std::vector<uint8_t>& image)
+{
+    int pixel_count = image.size();
+
+    // use this to scale result to be within allowed shutter time boundaries
+    scaling_factor = (config.max_shutter_time - config.min_shutter_time)/static_cast<float>(pixel_count);
+
+    int num_too_bright = 0;
+    int num_too_dark   = 0;
+    int intensity_sum  = 0;
+
+    // iterate over image to calculate mean and count bright and dark pixels
+    for (int i = 0; i < pixel_count; i++)
     {
-        threshMaxIntensity = (uint8_t)(config.maxIntensity * config.factMaxIntensity);
-        threshMinIntensity = (uint8_t)(config.maxIntensity * config.factMinIntensity);
-        minMean = config.maxIntensity * config.factMinMean;
-        maxMean = config.maxIntensity * config.factMaxMean;
-        weightOld = config.weightOldShutterTime;
-        weightNew = 1.0 - weightOld;
+        if (image[i] > threshold_max_intensity)
+            num_too_bright++;
+        if (image[i] < threshold_min_intensity)
+            num_too_dark++;
+        intensity_sum += image[i];
     }
+    double mean = static_cast<double>(intensity_sum) / static_cast<double>(pixel_count);
 
-    //int ShutterController::analyze(base::samples::frame::Frame frame)
-    int ShutterController::analyze(std::vector<uint8_t> image)
+    // decide whether image is too bright or dark
+    if (mean > max_mean)
     {
-        int pixelCount = image.size()/sizeof(uint8_t);
-
-        // use this to scale result to be be within allowed shutter time boundaries
-        scalingFactor = (config.maxShutterTime - config.minShutterTime)/(float)pixelCount;
-
-        int numTooBright = 0;
-        int numTooDark   = 0;
-        int intensitySum = 0;
-        // iterate over image to calculate mean and cound bright and dark pixels
-        for (int i = 0; i < pixelCount; i++)
-        {
-            if (image[i] > threshMaxIntensity)
-                numTooBright++;
-            if (image[i] < threshMinIntensity)
-                numTooDark++;
-            intensitySum += image[i];
-        }
-        double mean = (double)intensitySum / (double)pixelCount;
-
-        // decide whether image is too bright or dark
-        if (mean > maxMean)
-        {
-            // image is too bright, return positive value
-            LOG_DEBUG_S << "Mean " << mean << " bigger than max mean " << (int)maxMean;
-            return numTooBright;
-        }
-        else if (mean < minMean)
-        {
-            // image is too dark, return negative value
-            LOG_DEBUG_S << "Mean " << mean << " smaller than min mean " << (int)minMean;
-            return -numTooDark;
-        }
-        // image is within bounds
-        return 0;
+        // image is too bright, return positive value
+        LOG_DEBUG_S << "Mean " << mean << " bigger than max mean " << max_mean;
+        return num_too_bright;
     }
-
-    int ShutterController::calcNewShutterTime(const int analysisResult)
+    else if (mean < min_mean)
     {
-        shutterTime = weightOld*shutterTime + weightNew*(shutterTime - (scalingFactor * analysisResult));
-        shutterTime = std::max(config.minShutterTime, shutterTime);
-        shutterTime = std::min(shutterTime, config.maxShutterTime);
-        return shutterTime;
+        // image is too dark, return negative value
+        LOG_DEBUG_S << "Mean " << mean << " smaller than min mean " << min_mean;
+        return -num_too_dark;
     }
+    // image is within bounds
+    return 0;
+}
 
+int ShutterController::calcNewShutterTime(const int analysis_result)
+{
+    shutter_time = weight_old*shutter_time + weight_new*(shutter_time - (scaling_factor * analysis_result));
+    shutter_time = std::max(config.min_shutter_time, shutter_time);
+    shutter_time = std::min(shutter_time, config.max_shutter_time);
+    return shutter_time;
 }
